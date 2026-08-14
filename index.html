@@ -145,6 +145,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--brown);box-shadow:0 0
   border-inline-start:3px solid var(--gold);background:rgba(232,178,56,.14)}
 .note.err{border-color:#8A2B2B;background:rgba(138,43,43,.10)}
 .note b{display:block;font-weight:600;margin-bottom:2px}
+.note .why{display:block;margin-top:8px;padding:8px 10px;background:rgba(63,45,43,.07);
+  font-family:var(--mono);font-size:11px;line-height:1.6;direction:ltr;text-align:left;
+  word-break:break-word;color:var(--ink-60)}
 .note .act{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .loading{display:flex;align-items:center;gap:12px;padding:26px 0;font-size:14px;color:var(--ink-60)}
 .pulse{width:9px;height:9px;background:var(--gold);border-radius:50%;animation:p 1.1s infinite}
@@ -821,6 +824,25 @@ $('keyBtn').addEventListener('click', ()=>{
     { panel:true, closeLabel:'إغلاق' });
 });
 
+/* Surfaces what the server actually said, so a failure is diagnosable
+   instead of just "it didn't work". */
+function whyFailed(err){
+  if (!err) return '';
+  if (err.kind === 'network') return 'NETWORK — request blocked or unreachable';
+  let msg = '';
+  try{
+    const j = JSON.parse(err.detail || '');
+    msg = (j.error && (j.error.message || j.error)) || j.message || '';
+    if (typeof msg !== 'string') msg = JSON.stringify(msg);
+  }catch(e){ msg = (err.detail || '').slice(0,300); }
+  return ('HTTP ' + (err.status || '?') + (msg ? ' — ' + msg : '')).trim();
+}
+function withWhy(n, err){
+  const why = whyFailed(err);
+  if (why && n) n.querySelector('div').appendChild(el('span','why', escapeHTML(why)));
+  return n;
+}
+
 /* --- actions --- */
 async function runAnalyze(){
   S.raw = $('raw').value.trim();
@@ -844,16 +866,16 @@ async function runAnalyze(){
           ? 'المتصفح مش قادر يوصل لخادم الوكيل. اتأكد إن الـ Worker شغّال وإن دومين الصفحة مضاف في قائمة ALLOWED_ORIGINS عنده. تقدر مؤقتًا تستخدم مفتاحك الشخصي، أو تكمّل وتصحّح يدويًا.'
           : 'المتصفح مش قادر يوصل لخدمة التحرير من الصفحة دي. لو الأداة مفتوحة كملف مستقل، محتاجة مفتاح Anthropic API عشان تشتغل. الصق المفتاح هنا، أو كمّل وصحّح النص يدويًا — باقي الأداة شغّال عادي.');
     else if (k === 'auth')
-      keyPanel($('s2body'), 'المفتاح مرفوض',
-        'الخدمة رفضت المفتاح. تأكد إنه مفتاح Anthropic API صالح وفيه رصيد، وجرّب تاني.');
+      withWhy(keyPanel($('s2body'), 'المفتاح مرفوض',
+        'الخدمة رفضت الطلب. لو بتستخدم الوكيل، غالبًا دومين الصفحة مش مضاف في ALLOWED_ORIGINS. لو بمفتاحك الشخصي، اتأكد إنه صالح.'), err);
     else if (k === 'rate')
-      note($('s2body'),'err','تجاوزت حد الاستخدام',
+      withWhy(note($('s2body'),'err','تجاوزت حد الاستخدام',
         'الخدمة رفضت الطلب مؤقتًا بسبب كثرة الطلبات. استنى شوية وأعد المحاولة.',
-        [['إعادة المحاولة', ()=>runAnalyze(), 'gold']]);
+        [['إعادة المحاولة', ()=>runAnalyze(), 'gold']]), err);
     else
-      note($('s2body'),'err','تعذّر تحليل النص',
-        'لم تستجب خدمة التحرير، وتم ضبط المسافات وعلامات الترقيم فقط. يمكنك تعديل النص هنا والمتابعة.',
-        [['إعادة المحاولة', ()=>runAnalyze(), 'gold']]);
+      withWhy(note($('s2body'),'err','تعذّر تحليل النص',
+        'الخادم رد برسالة خطأ. التفاصيل تحت — غالبًا الرصيد أو المفتاح أو اسم الموديل. النص اتعمله ضبط مسافات وترقيم فقط ويمكنك تعديله والمتابعة.',
+        [['إعادة المحاولة', ()=>runAnalyze(), 'gold']]), err);
   }finally{ S.busy=false; $('cta').disabled=false; }
 }
 
