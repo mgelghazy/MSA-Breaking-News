@@ -1,0 +1,6 @@
+name = "msa-news-desk-api"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+# The API key is a SECRET — never put it in this file.
+# Set it once with:  npx wrangler secret put ANTHROPIC_API_KEY
