@@ -15,6 +15,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:'MSA Lafet';src:url('assets/fonts/lafet-bold.otf') format('opentype');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:'MSA Swissra';src:url('assets/fonts/Swissra-Medium.otf') format('opentype');font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:'MSA PixelMachine';src:url('assets/fonts/PixelMachine-reference.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'MSA Type Light';src:url('assets/fonts/TypeLightSans.otf') format('opentype');font-style:normal;font-weight:300;font-display:swap}
 :root{
   --brown:#3F2D2B;
   --char:#333333;
@@ -226,7 +230,7 @@ canvas{display:none}
 
     <div class="card">
       <div class="cap">المخرجات</div>
-      <div class="spec">Instagram Story — 1080 × 1920<br>Instagram Post — 1080 × 1080</div>
+      <div class="spec">Instagram Story — 1080 × 1920<br>Instagram Feed — 1080 × 1350</div>
     </div>
   </section>
 
@@ -235,7 +239,7 @@ canvas{display:none}
     <div class="eyebrow"><span class="num">04</span><h2>المعاينة</h2></div>
     <div class="seg" id="fmtSeg" role="tablist">
       <button role="tab" data-fmt="story" aria-selected="true">ستوري 9:16</button>
-      <button role="tab" data-fmt="post" aria-selected="false">بوست 1:1</button>
+      <button role="tab" data-fmt="post" aria-selected="false">بوست 4:5</button>
     </div>
     <div class="frame story" id="frame"><img id="preview" alt="معاينة التصميم"></div>
     <p class="tip">اضغط مطولًا على الصورة لحفظها، أو استخدم الأزرار بالأسفل.</p>
@@ -282,28 +286,24 @@ const LABELS = ['عاجل','خبر عاجل','تحديث','سعر اليوم','�
 
 /* ---------- 2. brand tokens ---------- */
 const BRAND = {
-  brown:'#3F2D2B', char:'#333333', paper:'#EDEDED', grey:'#C6C6C6', gold:'#E8B238',
-  caption:{ l1:['@MSA.EGY','METAL SERVICE AGENCY FOR'], l2:['PURE METALS','INVESTMENTS.'] },
-  tagline:'CONFIDENCE IN EVERY STEP'
+  brown:'#3F2D2B', black:'#1D1513', paper:'#EDEDED', gold:'#E8B238',
+  handle:'@MSA.EGY',
+  agency:['METAL SERVICE AGENCY FOR','INVESTMENTS.']
 };
 
 /* the two metals — slab and background are real gradients, not flat fills */
 const THEME = {
   gold:{
-    bgStops:[[0,'#4B3633'],[0.55,'#3F2D2B'],[1,'#2B1E1D']],
-    slabStops:[[0,'#8F5F1C'],[0.18,'#E8B238'],[0.44,'#FBEBC0'],[0.62,'#DDA22B'],[0.84,'#A9711D'],[1,'#F0CB6E']],
-    slabInk:'#33231F',
-    ink:'#EDEDED', soft:'rgba(237,237,237,.66)', rule:'rgba(237,237,237,.26)',
-    mark:'rgba(232,178,56,.06)',
-    tagBg:'#EDEDED', tagInk:'#3F2D2B', dot:'#E8B238'
+    bgStops:[[0,'#604542'],[1,'#3F2D2B']],
+    slabStops:[[0,'#FCCF01'],[.46,'#F9B81C'],[1,'#F8B124']],
+    slabInk:'#3F2D2B', ink:'#FFFFFF', soft:'rgba(255,255,255,.84)', rule:'#231918',
+    moduleBorder:'#231918', mark:'rgba(255,255,255,.025)', tagBg:'#231918', tagInk:'#F8B124', dateBg:'#231918', dateInk:'#F8B124'
   },
   silver:{
-    bgStops:[[0,'#F6F7F8'],[0.55,'#E7E9EA'],[1,'#D2D5D7']],
-    slabStops:[[0,'#8A8E92'],[0.18,'#D9DCDE'],[0.44,'#FFFFFF'],[0.62,'#C2C6C9'],[0.84,'#8E9296'],[1,'#E6E8EA']],
-    slabInk:'#2A2A2A',
-    ink:'#3F2D2B', soft:'rgba(51,51,51,.62)', rule:'rgba(51,51,51,.24)',
-    mark:'rgba(63,45,43,.05)',
-    tagBg:'#3F2D2B', tagInk:'#E8B238', dot:'#3F2D2B'
+    bgStops:[[0,'#F1F1F1'],[1,'#E2E2E2']],
+    slabStops:[[0,'#44302E'],[.48,'#362725'],[1,'#2D211F']],
+    slabInk:'#FFFFFF', ink:'#2D211F', soft:'rgba(45,33,31,.86)', rule:'#A9A9A9',
+    moduleBorder:'#231918', mark:'rgba(45,33,31,.025)', tagBg:'#FFFFFF', tagInk:'#3F2D2B', dateBg:'#FFFFFF', dateInk:'#3F2D2B'
   }
 };
 
@@ -419,11 +419,30 @@ async function condense(text, limit){
 
 /* ---------- 4. template renderer --------------------------------------- */
 const SPEC = {
-  story:{ W:1080, H:1920, M:88, band:[430,1560], sizes:[104,96,88,80,72,64,58],
-          maxLines:5, logoW:250, capSize:23, tag:36, detail:34, foot:1748, rule:1690, gridTop:340 },
-  post: { W:1080, H:1080, M:76, band:[276,836],  sizes:[92,84,76,68,60,54],
-          maxLines:4, logoW:212, capSize:21, tag:32, detail:30, foot:966,  rule:918, gridTop:236 }
+  story:{ W:1080, H:1920, L:80, R:1013, logoY:305, logoW:190, gridX:614, gridW:46,
+          gridTop:300, ruleY:570, ruleL:255, ruleR:1015, gridBottom:1690,
+          tagX:660.753, tagY:602.468, tagW:352.352, tagH:103.013, tagSize:55.5588,
+          copyTop:705, sizes:[83,80,77,74,71,68,65,62,59,56], maxLines:4,
+          dateX:190.328, dateY:1201.734, dateW:411.771, dateH:102.188, dateSize:54.9926,
+          dateBaseY:1274.8135, dateTextX:[218.7764,309.6242,423.459], colonX:[287.888,398.014], colonY:[1243.025,1256.779], colonSize:8.856,
+          detailX:80, detailY:1551, detailSize:55.5588, footY:1551, footerSize:16.9046 },
+  post: { W:1080, H:1350, L:80, R:1013, logoY:160, logoW:190, gridX:614, gridW:46,
+          gridTop:160, ruleY:311, ruleL:255, ruleR:1015, gridBottom:1195,
+          tagX:660.753, tagY:342.468, tagW:352.352, tagH:103.013, tagSize:55.5588,
+          copyTop:445, sizes:[83,80,77,74,71,68,65,62,59,56], maxLines:4,
+          dateX:190.328, dateY:941.734, dateW:411.771, dateH:102.188, dateSize:54.9926,
+          dateBaseY:1014.8135, dateTextX:[218.7764,309.6242,423.459], colonX:[287.888,398.014], colonY:[983.025,996.779], colonSize:8.856,
+          detailX:80, detailY:1168, detailSize:55.5588, footY:1168, footerSize:16.9046 }
 };
+
+function headlineBlocks(spec){
+  return [
+    {x:99,  y:spec.copyTop,     w:914, h:125},
+    {x:190, y:spec.copyTop+125, w:823, h:124},
+    {x:102, y:spec.copyTop+249, w:911, h:124},
+    {x:602, y:spec.copyTop+373, w:411, h:125}
+  ];
+}
 
 function greedy(ctx, words, avail){
   const lines = []; let cur = '';
@@ -439,19 +458,29 @@ function greedy(ctx, words, avail){
 /* largest size that fits, then balance the ragged edge */
 function fitHeadline(ctx, text, spec){
   const words = text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
-  const maxW = spec.W - spec.M*2;
+  const blocks = headlineBlocks(spec);
   for (const size of spec.sizes){
-    const padX = Math.round(size*0.34);
-    const avail = maxW - padX*2;
-    ctx.font = `700 ${size}px Alexandria, sans-serif`;
-    const lines = greedy(ctx, words, avail);
-    if (!lines || lines.length > spec.maxLines) continue;
-    let best = lines;
-    for (let f=0.95; f>=0.55; f-=0.05){
-      const t = greedy(ctx, words, avail*f);
-      if (t && t.length === lines.length) best = t; else break;
-    }
-    return {size, lines:best, padX};
+    const padX = Math.round(size*.42);
+    ctx.font = `500 ${size}px "MSA Swissra", Alexandria, sans-serif`;
+    const arrange = (wordIndex, blockIndex) => {
+      if (wordIndex === words.length) return [];
+      if (blockIndex === blocks.length) return null;
+      let line = '';
+      const candidates = [];
+      for (let end=wordIndex; end<words.length; end++){
+        line = line ? `${line} ${words[end]}` : words[end];
+        if (ctx.measureText(line).width > blocks[blockIndex].w-padX*2) break;
+        candidates.push([line,end+1]);
+      }
+      for (let i=candidates.length-1; i>=0; i--){
+        const [candidate,next] = candidates[i];
+        const remainder = arrange(next, blockIndex+1);
+        if (remainder) return [candidate, ...remainder];
+      }
+      return null;
+    };
+    const lines = arrange(0,0);
+    if (lines) return {size, lines, padX, blocks};
   }
   return null;
 }
@@ -466,6 +495,35 @@ function wrapPlain(ctx, text, font, maxW, maxLines){
   return lines.slice(0, maxLines);
 }
 
+/* The Illustrator file embeds PixelMachine as a date-only subset containing
+   0–8. Colons are separate square vectors in the master; a 9 is the 180°
+   counterpart of its seven-segment 6. */
+function drawPixelGroup(ctx, text, x, baseline, size, color){
+  ctx.font = `400 ${size}px "MSA PixelMachine", monospace`;
+  ctx.fillStyle = color;
+  ctx.textAlign = 'left';
+  ctx.direction = 'ltr';
+  let cursor = x;
+  for (const char of text){
+    if (char !== '9'){
+      ctx.fillText(char, cursor, baseline);
+      cursor += ctx.measureText(char).width;
+      continue;
+    }
+    const metrics = ctx.measureText('6');
+    const width = metrics.width;
+    const ascent = metrics.actualBoundingBoxAscent || size*.72;
+    const descent = metrics.actualBoundingBoxDescent || 0;
+    const centerY = baseline + (descent-ascent)/2;
+    ctx.save();
+    ctx.translate(cursor+width/2, centerY);
+    ctx.rotate(Math.PI);
+    ctx.fillText('6', -width/2, (ascent-descent)/2);
+    ctx.restore();
+    cursor += width;
+  }
+}
+
 function render(fmt){
   const spec = SPEC[fmt], T = THEME[S.theme];
   const cv = document.getElementById('cv');
@@ -473,115 +531,100 @@ function render(fmt){
   const ctx = cv.getContext('2d');
   ctx.textBaseline = 'alphabetic';
 
-  /* metal background */
+  /* Reference master: the technical grid, fixed label module and text slabs
+     use the Illustrator artboards' original proportions. */
   ctx.fillStyle = grad(ctx, T.bgStops, 0, 0, spec.W, spec.H);
   ctx.fillRect(0,0,spec.W,spec.H);
-
-  /* monogram texture, kept very quiet */
-  if (LOGO_MONO.complete && LOGO_MONO.naturalWidth){
-    const mw = spec.W*0.78, mh = mw*LOGO_MONO.naturalHeight/LOGO_MONO.naturalWidth;
-    ctx.drawImage(tinted(LOGO_MONO,T.mark), -mw*0.22, spec.H - mh*0.72, mw, mh);
-  }
-
-  const R = spec.W - spec.M, L = spec.M;
 
   const fit = fitHeadline(ctx, S.final, spec);
   if (!fit) return null;
 
-  const lineH = Math.round(fit.size*1.50);
-  const gap   = Math.round(fit.size*0.11);
-  const tagH  = Math.round(spec.tag*2.05);
-
-  let detailLines = [];
-  const detailFont = `400 ${spec.detail}px Alexandria, sans-serif`;
-  if (S.detail.trim()) detailLines = wrapPlain(ctx, S.detail.trim(), detailFont, spec.W-spec.M*2-20, 2);
-
-  const blockH = tagH + Math.round(fit.size*0.42)
-               + fit.lines.length*lineH + (fit.lines.length-1)*gap
-               + (detailLines.length ? 46 + detailLines.length*Math.round(spec.detail*1.6) : 0);
-  const top = Math.round(spec.band[0] + (spec.band[1]-spec.band[0]-blockH)/2);
-
   /* technical grid */
-  const gx = Math.round(spec.W*0.235);
-  ctx.strokeStyle = T.rule; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(gx+.5, spec.gridTop); ctx.lineTo(gx+.5, spec.rule); ctx.stroke();
+  ctx.font = `300 ${spec.footerSize}px "MSA Type Light", "Space Mono", monospace`;
+  const footerAscent = ctx.measureText(BRAND.agency[0]).actualBoundingBoxAscent || spec.footerSize;
+  const guideBottom = spec.footY-footerAscent-10;
+  ctx.strokeStyle = T.rule; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(spec.gridX+.5, spec.gridTop); ctx.lineTo(spec.gridX+.5, guideBottom); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(spec.gridX+spec.gridW+.5, spec.gridTop); ctx.lineTo(spec.gridX+spec.gridW+.5, guideBottom); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(spec.ruleL, spec.ruleY+.5); ctx.lineTo(spec.ruleR, spec.ruleY+.5); ctx.stroke();
+  ctx.fillStyle = T.tagBg; ctx.fillRect(spec.gridX, spec.ruleY, spec.gridW, spec.gridW);
 
-  const headTop = top + tagH + Math.round(fit.size*0.42);
-  const headBot = headTop + fit.lines.length*lineH + (fit.lines.length-1)*gap;
-  [headTop, headBot].forEach(y=>{
-    ctx.beginPath(); ctx.moveTo(L, y+.5); ctx.lineTo(R, y+.5); ctx.stroke();
-  });
-  [headTop, headBot].forEach(y=>{
-    ctx.beginPath(); ctx.arc(gx, y, 9, 0, Math.PI*2);
-    ctx.fillStyle = T.bgStops[1][1]; ctx.fill(); ctx.stroke();
-  });
-
-  ctx.direction = 'rtl';
-
-  /* news label */
-  ctx.font = `700 ${spec.tag}px Alexandria, sans-serif`;
-  const tagW = ctx.measureText(S.label).width + spec.tag*1.5;
+  /* Dynamic category: fixed module, variable title. */
   ctx.fillStyle = T.tagBg;
-  ctx.fillRect(R-tagW, top, tagW, tagH);
+  ctx.fillRect(spec.tagX, spec.tagY, spec.tagW, spec.tagH);
+  ctx.strokeStyle = T.moduleBorder; ctx.lineWidth = 2;
+  ctx.strokeRect(spec.tagX, spec.tagY, spec.tagW, spec.tagH);
   ctx.fillStyle = T.tagInk;
-  ctx.textAlign = 'right';
-  ctx.fillText(S.label, R - spec.tag*0.75, top + tagH*0.5 + spec.tag*0.36);
-  ctx.beginPath(); ctx.arc(R-tagW-spec.tag*0.9, top+tagH*0.5, spec.tag*0.22, 0, Math.PI*2);
-  ctx.fillStyle = T.dot; ctx.fill();
+  ctx.direction = 'rtl'; ctx.textAlign = 'center';
+  ctx.font = `700 ${spec.tagSize}px "MSA Lafet", Alexandria, sans-serif`;
+  const tagScale = Math.min(1, (spec.tagW-44)/Math.max(ctx.measureText(S.label).width,1));
+  if (tagScale < 1) ctx.font = `700 ${Math.floor(spec.tagSize*tagScale)}px "MSA Lafet", Alexandria, sans-serif`;
+  ctx.fillText(S.label, spec.tagX+spec.tagW/2, spec.tagY+spec.tagH*.658);
 
-  /* headline slabs, each poured with its own metal gradient */
-  ctx.font = `700 ${fit.size}px Alexandria, sans-serif`;
-  let y = headTop;
-  for (const line of fit.lines){
-    const w = ctx.measureText(line).width + fit.padX*2;
-    ctx.fillStyle = grad(ctx, T.slabStops, R-w, y, R, y+lineH);
-    ctx.fillRect(R-w, y, w, lineH);
+  /* The four stepped slabs are fixed in the Illustrator master; only their
+     Arabic copy is variable and reflows to the corresponding line widths. */
+  ctx.font = `500 ${fit.size}px "MSA Swissra", Alexandria, sans-serif`;
+  fit.blocks.forEach(block=>{
+    ctx.fillStyle = grad(ctx, T.slabStops, block.x, block.y, block.x+block.w, block.y+block.h);
+    ctx.fillRect(block.x, block.y, block.w, block.h);
+  });
+  fit.lines.forEach((line, index)=>{
+    if (!line) return;
+    const block = fit.blocks[index];
+    const lineTighten = 4; // 3 pt at the 96 dpi canvas scale
+    const centeredTightening = (fit.lines.length-1)*lineTighten/2;
     ctx.fillStyle = T.slabInk;
-    ctx.fillText(line, R - fit.padX, y + lineH*0.5 + fit.size*0.36);
-    y += lineH + gap;
-  }
+    ctx.textAlign = 'right';
+    ctx.fillText(line, block.x+block.w-fit.padX, block.y + block.h*.77 + centeredTightening-index*lineTighten);
+  });
 
-  /* detail line */
-  if (detailLines.length){
-    ctx.font = detailFont; ctx.fillStyle = T.soft;
-    let dy = headBot + 46 + spec.detail;
-    for (const dl of detailLines){ ctx.fillText(dl, R, dy); dy += Math.round(spec.detail*1.6); }
-  }
-
-  /* --- brand furniture --- */
+  /* Static brand furniture, exactly anchored to the master template. */
   ctx.direction = 'ltr'; ctx.textAlign = 'left';
-
   if (LOGO_WORD.complete && LOGO_WORD.naturalWidth){
     const lw = spec.logoW, lh = lw*LOGO_WORD.naturalHeight/LOGO_WORD.naturalWidth;
-    ctx.drawImage(tinted(LOGO_WORD,T.ink), L, spec.M*1.55, lw, lh);
+    ctx.drawImage(tinted(LOGO_WORD,T.ink), spec.L, spec.logoY, lw, lh);
   }
 
-  const cs = spec.capSize;
-  ctx.font = `400 ${cs}px "Space Mono", monospace`;
-  ctx.fillStyle = T.soft;
-  const capTop = spec.M*1.62 + cs;
-  const colB = Math.max(ctx.measureText(BRAND.caption.l1[1]).width,
-                        ctx.measureText(BRAND.caption.l2[1]).width);
-  const colAx = R - colB - cs*2.2;
-  ctx.textAlign = 'right';
-  ctx.fillText(BRAND.caption.l1[0], colAx, capTop);
-  ctx.fillText(BRAND.caption.l2[0], colAx, capTop + cs*1.5);
-  ctx.fillText(BRAND.caption.l1[1], R, capTop);
-  ctx.fillText(BRAND.caption.l2[1], R, capTop + cs*1.5);
+  /* Dynamic date */
+  ctx.fillStyle = T.dateBg;
+  ctx.fillRect(spec.dateX, spec.dateY, spec.dateW, spec.dateH);
+  ctx.strokeStyle = T.moduleBorder; ctx.lineWidth = 2;
+  ctx.strokeRect(spec.dateX, spec.dateY, spec.dateW, spec.dateH);
+  const date = stampParts();
+  drawPixelGroup(ctx, date[0], spec.dateTextX[0], spec.dateBaseY, spec.dateSize, T.dateInk);
+  drawPixelGroup(ctx, date[1], spec.dateTextX[1], spec.dateBaseY, spec.dateSize, T.dateInk);
+  drawPixelGroup(ctx, date[2], spec.dateTextX[2], spec.dateBaseY, spec.dateSize, T.dateInk);
+  ctx.fillStyle = T.dateInk;
+  for (const x of spec.colonX){
+    for (const y of spec.colonY) ctx.fillRect(x, y, spec.colonSize, spec.colonSize);
+  }
 
-  ctx.strokeStyle = T.rule; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(L, spec.rule+.5); ctx.lineTo(R, spec.rule+.5); ctx.stroke();
-  ctx.font = `700 ${cs}px "Space Mono", monospace`;
-  ctx.fillStyle = T.soft;
-  ctx.textAlign = 'left';  ctx.fillText(stamp(), L, spec.foot);
-  ctx.textAlign = 'right'; ctx.fillText(BRAND.tagline, R, spec.foot);
+  /* Dynamic optional detail line at lower left. */
+  if (S.detail.trim()){
+    ctx.direction = 'rtl'; ctx.textAlign = 'left';
+    let detailSize = spec.detailSize;
+    ctx.font = `700 ${detailSize}px "MSA Lafet", Alexandria, sans-serif`;
+    const detailMaxWidth = 460;
+    detailSize = Math.max(16, Math.floor(detailSize*Math.min(1, detailMaxWidth/ctx.measureText(S.detail.trim()).width)));
+    ctx.font = `700 ${detailSize}px "MSA Lafet", Alexandria, sans-serif`;
+    ctx.fillStyle = T.ink;
+    ctx.fillText(S.detail.trim(), spec.detailX, spec.detailY);
+  }
+
+  ctx.direction = 'ltr'; ctx.font = `300 ${spec.footerSize}px "MSA Type Light", "Space Mono", monospace`;
+  ctx.fillStyle = T.ink;
+  ctx.textAlign = 'left';
+  ctx.fillText(BRAND.handle, 616.6025, spec.footY);
+  ctx.fillText(BRAND.agency[0], 761.6465, spec.footY);
+  ctx.fillText('PURE METALS', 651.1318, spec.footY+19.04);
+  ctx.fillText(BRAND.agency[1], 852, spec.footY+19.04);
 
   return cv.toDataURL('image/png');
 }
 
-function stamp(){
+function stampParts(){
   const d = new Date(), p = n => String(n).padStart(2,'0');
-  return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}  —  ${p(d.getHours())}:${p(d.getMinutes())}`;
+  return [p(d.getDate()),p(d.getMonth()+1),String(d.getFullYear())];
 }
 
 /* ---------- 5. UI ------------------------------------------------------ */
@@ -928,10 +971,10 @@ $('cta').addEventListener('click', ()=>{
 const fontsReady = (async ()=>{
   try{
     await Promise.all([
-      document.fonts.load('700 100px Alexandria'),
-      document.fonts.load('400 100px Alexandria'),
-      document.fonts.load('700 100px "Space Mono"'),
-      document.fonts.load('400 100px "Space Mono"')
+      document.fonts.load('700 100px "MSA Lafet"'),
+      document.fonts.load('500 100px "MSA Swissra"'),
+      document.fonts.load('400 100px "MSA PixelMachine"'),
+      document.fonts.load('300 100px "MSA Type Light"')
     ]);
     await document.fonts.ready;
   }catch(e){}
