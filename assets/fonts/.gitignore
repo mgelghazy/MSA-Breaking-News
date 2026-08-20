@@ -1,0 +1,5 @@
+# Licensed font binaries are local-only.
+*
+!.gitignore
+!README.md
+
