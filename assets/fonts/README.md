@@ -1,7 +1,8 @@
-# Required local fonts
+# Required web fonts
 
-Font binaries are intentionally not committed to this public repository.
-Install licensed copies locally in this directory with these exact filenames:
+The renderer loads these files from this directory. Their exact filenames must
+remain stable so the exported HTML and GitHub Pages deployment use the intended
+typography:
 
 | Font family | Required filename | Template role |
 | --- | --- | --- |
@@ -14,5 +15,5 @@ The renderer declares the corresponding local families as `MSA Swissra`,
 `MSA Lafet`, `MSA Type Light`, and `MSA PixelMachine` in `index.html`.
 
 Earlier comparison files named `Pixel-lcd-machine.ttf`,
-`Pixel-lcd-machine.woff`, and `PixelMachine-reference-subset.ttf` are also
-ignored and are not required by the current renderer.
+`Pixel-lcd-machine.woff`, and `PixelMachine-reference-subset.ttf` remain ignored
+because they are not required by the current renderer.

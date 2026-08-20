@@ -17,7 +17,6 @@ breaking-news templates.
 
 ## Required fonts
 
-The licensed font binaries are intentionally excluded from Git. Place locally
-licensed copies in `assets/fonts/` using the filenames documented in
-`fonts/README.md` before rendering or releasing the templates.
-
+The deployed renderer uses the four font files documented in
+`fonts/README.md`. Their family names and exact template roles are preserved
+there for future edits and releases.

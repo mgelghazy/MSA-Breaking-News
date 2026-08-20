@@ -1,5 +1,4 @@
-# Licensed font binaries are local-only.
-*
-!.gitignore
-!README.md
-
+# Earlier comparison fonts are local-only and unused by the renderer.
+Pixel-lcd-machine.ttf
+Pixel-lcd-machine.woff
+PixelMachine-reference-subset.ttf
